@@ -21,8 +21,8 @@ static EventGroupHandle_t wifi_event_group;
 const int CONNECTED_BIT = BIT0;
 const int DISCONNECTED_BIT = BIT1;
 
-const wifi_bandwidth_t  CURRENT_BW = WIFI_BW_HT20;
-const uint8_t  CURRENT_CHANNEL = 1;
+const wifi_bandwidth_t  CURRENT_BW = WIFI_BW_HT20; //enumerator; WIFI_BW_HT20 = 1
+const uint8_t  CURRENT_CHANNEL = 1; //a cross-platform type that is used to create an exact amount of 8 bits  with or without sign, no matter which platform the program runs on.
 
 
 static void wifi_connected_handler(void *arg, esp_event_base_t event_base,
@@ -58,14 +58,18 @@ void initialise_wifi(void)
     if (initialized) {
         return;
     }
-
+  
+    /* ESP_ERROR_CHECK macro serves similar purpose as assert, except that it checks esp_err_t value rather than a bool condition.
+    If the argument of ESP_ERROR_CHECK is not equal ESP_OK, then an error message is printed on the console, and abort() is called. 
+    There are other variants like ESP_ERROR_CHECK_WITHOUT_ABORT, ESP_RETURN_ON_ERROR */
+    
     ESP_ERROR_CHECK(esp_netif_init());
     wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK( esp_event_loop_create_default() );
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                    WIFI_EVENT_STA_CONNECTED,
+                    WIFI_EVENT_STA_CONNECTED, // WIFI_MODE_STA is the station mode, which is the standard client mode
                     &wifi_connected_handler,
                     NULL,
                     NULL));
@@ -75,10 +79,13 @@ void initialise_wifi(void)
                     NULL,
                     NULL));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL) );
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL) ); // The null mode or the WIFI_MODE_OFF is basically the OFF mode 
 
-    ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_AP, CURRENT_BW));
-    ESP_ERROR_CHECK(esp_wifi_start() );
+    ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_AP, CURRENT_BW)); // WIFI_MODE_AP is the Access Point Mode where the clients connect to the ESP32; set_bandwidth is used to set the current bandwidth value to the access point
+    ESP_ERROR_CHECK(esp_wifi_start() ); /*Start WiFi according to current configuration (Here, it is the anchor mode, WIFI_MODE_AP).
+          If mode is WIFI_MODE_STA, it create station control block and start station. 
+          If mode is WIFI_MODE_AP, it create soft-AP control block and start soft-AP.
+          If mode is WIFI_MODE_APSTA, it create soft-AP and station control block and start soft-AP and station.*/
     initialized = true;
 }
 
@@ -114,12 +121,12 @@ static bool start_wifi_ap(const char* ssid, const char* pass)
 
 void app_main(void)
 {
-    uint8_t mac[6];
-    char mac_add[17];
+    uint8_t mac[6]; // no. of tags? 
+    char mac_add[17]; // referring to the physical mac address of the tag?
 
-    wifi_bandwidth_t bw;
+    wifi_bandwidth_t bw; //a specific datatype (basically an enumerator that has two ? WIFI_BW_20 = 1 and WIFI_BW_40)
 
-    esp_err_t ret = nvs_flash_init();
+    esp_err_t ret = nvs_flash_init(); //
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
