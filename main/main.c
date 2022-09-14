@@ -2,14 +2,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <string.h>
-#include "nvs_flash.h"
+#include "nvs_flash.h" // interfacing flash memory 
 #include "cmd_system.h"
 #include "argtable3/argtable3.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "esp_event.h"
 #include "esp_log.h"
-#include "esp_err.h"
+#include "esp_err.h" // error handling
 #include "esp_wifi.h"
 #include "esp_console.h"
 
@@ -78,7 +78,7 @@ void initialise_wifi(void)
                     &disconnect_handler,
                     NULL,
                     NULL));
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM) ); // Configuring the storage type as that of the of the WIFI_STORAGE_RAM of the board
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL) ); // The null mode or the WIFI_MODE_OFF is basically the OFF mode 
 
     ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_AP, CURRENT_BW)); // WIFI_MODE_AP is the Access Point Mode where the clients connect to the ESP32; set_bandwidth is used to set the current bandwidth value to the access point
@@ -126,8 +126,8 @@ void app_main(void)
 
     wifi_bandwidth_t bw; //a specific datatype (basically an enumerator that has two ? WIFI_BW_20 = 1 and WIFI_BW_40)
 
-    esp_err_t ret = nvs_flash_init(); //
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    esp_err_t ret = nvs_flash_init(); // This function returns the availability status of the on board flash memory for its usage in the required configuration (here wifi)?
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) { //NO_FREE_PAGES means flash memory full? and NEW_VERSION_FOUND refers to an interrupt requesting to update the flash memory status? 
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
